@@ -8,8 +8,6 @@ exports.getIndex = (req, res, next) => {
             prods: products,
             pageTitle: "Welcome to shop",
             path: '/',
-            formsCSS: true,
-            productsCSS: true
         });
 
 
@@ -25,8 +23,7 @@ exports.getProducts = (req, res, next) => {
             pageTitle: "All Products",
             path: '/products',
             hasProducts: products.length > 0,
-            activeShop: true,
-            productsCSS: true
+        
         });
     });
 };
@@ -60,13 +57,6 @@ exports.postCart = (req, res, next) => {
     });
 
     res.redirect('/cart');
-
-    // console.log(prodId);
-
-    // res.render('shop/cart', {
-    //     pageTitle: "Your Cart",
-    //     path: '/cart',
-    // });
 };
 
 exports.getOrders = (req, res, next) => {
