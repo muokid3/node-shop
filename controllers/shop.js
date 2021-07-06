@@ -1,42 +1,56 @@
 const Product = require('../models/product');
 const Cart = require('../models/cart');
 
+
 exports.getIndex = (req, res, next) => {
     // console.log('In another middleware');
-    const products = Product.fetchAll(products => {
+
+    Product.fetchAll()
+    .then(([rows, fieldData])=>{
         res.render('shop/index', {
-            prods: products,
+            prods: rows,
             pageTitle: "Welcome to shop",
             path: '/',
         });
-
-
+    })
+    .catch((err)=>{
+        console.log(err);
     });
-
 
 };
 
 exports.getProducts = (req, res, next) => {
-    const products = Product.fetchAll(products => {
+
+    Product.fetchAll()
+    .then(([rows, fieldData])=>{
+        //console.log(fieldData)
         res.render('shop/product-list', {
-            prods: products,
+            prods: rows,
             pageTitle: "All Products",
             path: '/products',
-            hasProducts: products.length > 0,
         
         });
+    })
+    .catch((err)=>{
+        console.log(err);
     });
+
 };
 
 exports.getProduct = (req, res, next) => {
     const prodId = req.params.productId;
 
-    Product.findById(prodId, (product) => {
+    Product.findById(prodId)
+    .then(([product])=>{
+        // console.log(product);
         res.render('shop/product-detail', { 
-            product: product,
-            pageTitle:product.title, 
+            product: product[0],
+            pageTitle:product[0].title, 
             path:"/products" 
         });
+    })
+    .catch((err)=>{
+        console.log(err);
     });
 
 
