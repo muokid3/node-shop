@@ -3,34 +3,33 @@ const Cart = require('../models/cart');
 
 
 exports.getIndex = (req, res, next) => {
-    // console.log('In another middleware');
-
 
     Product.findAll()
-    .then(products => {
-        res.render('shop/index', {
-            prods: products,
-            pageTitle: "Welcome to shop",
-            path: '/',
-        });
-    })
-    .catch(err => {console.log(err)});
-    
+        .then(products => {
+            res.render('shop/index', {
+                prods: products,
+                pageTitle: "Welcome to shop",
+                path: '/',
+            });
+        })
+        .catch(err => { console.log(err) });
+
+
 
 };
 
 exports.getProducts = (req, res, next) => {
 
     Product.findAll()
-    .then(products => {
-        res.render('shop/product-list', {
-            prods: products,
-            pageTitle: "All Products",
-            path: '/products',
-        
-        });
-    })
-    .catch(err => {console.log(err)});
+        .then(products => {
+            res.render('shop/product-list', {
+                prods: products,
+                pageTitle: "All Products",
+                path: '/products',
+
+            });
+        })
+        .catch(err => { console.log(err) });
 
 
 
@@ -39,66 +38,52 @@ exports.getProducts = (req, res, next) => {
 exports.getProduct = (req, res, next) => {
     const prodId = req.params.productId;
 
-    // Product.findAll({where: {id: prodId} })
-    // .then(products =>{
-    //     res.render('shop/product-detail', { 
-    //         product: products[0],
-    //         pageTitle:products[0].title, 
-    //         path:"/products" 
-    //     });
-    // })
-    // .catch(err => {console.log(err)});
-
     Product.findByPk(prodId)
-    .then((product)=>{
-        res.render('shop/product-detail', { 
-            product: product,
-            pageTitle:product.title, 
-            path:"/products" 
+        .then((product) => {
+            res.render('shop/product-detail', {
+                product: product,
+                pageTitle: product.title,
+                path: "/products"
+            });
+        })
+        .catch((err) => {
+            console.log(err);
         });
-    })
-    .catch((err)=>{
-        console.log(err);
-    });
 
 
 };
 
 exports.getCart = (req, res, next) => {
 
-    Cart.getCart(cart => {
-        Product.fetchAll(products => {
-
-            const cartProducts = [];
-            for(product of products){
-
-                const cartProductData = cart.products.find(prod => prod.id === product.id);
-                if (cartProductData){
-                    cartProducts.push({productData: product, qty: cartProductData.qty});
-                }
-            }
-
-            res.render('shop/cart', {
-                pageTitle: "Your Cart",
-                path: '/cart',
-                products: cartProducts,
-            });
+    req.user.getCart()
+        .then(cart => {
+            return cart.getProducts()
+                .then(products => {
+                    res.render('shop/cart', {
+                        pageTitle: "Your Cart",
+                        path: '/cart',
+                        products: products,
+                    });
+                })
+                .catch(err =>console.log(err));
         })
-    })
-    
+        .catch(err => console.log(err));
+
 };
 
 exports.postCart = (req, res, next) => {
     const prodId = req.body.productId;
 
-    Product.findById(prodId, (product) => {
-        Cart.addToCart(prodId,product.price);
-    });
+    req.user.getCart()
+    .then(cart =>{
 
-    res.redirect('/cart');
+    })
+    .catch(err =>console.log(err));
+
+    //res.redirect('/cart');
 };
 
-exports.deleteCartProduct = (req,res,next) => {
+exports.deleteCartProduct = (req, res, next) => {
     const productId = req.body.productId;
 
     Product.findById(productId, product => {
@@ -106,9 +91,9 @@ exports.deleteCartProduct = (req,res,next) => {
         res.redirect('/cart');
     });
 };
-    
 
-   
+
+
 
 exports.getOrders = (req, res, next) => {
     res.render('shop/orders', {
