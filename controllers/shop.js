@@ -65,7 +65,7 @@ exports.getCart = (req, res, next) => {
                         products: products,
                     });
                 })
-                .catch(err =>console.log(err));
+                .catch(err => console.log(err));
         })
         .catch(err => console.log(err));
 
@@ -73,23 +73,60 @@ exports.getCart = (req, res, next) => {
 
 exports.postCart = (req, res, next) => {
     const prodId = req.body.productId;
+    let fetchedCart;
+    let newQuantity = 1;
 
     req.user.getCart()
-    .then(cart =>{
+        .then(cart => {
+            fetchedCart = cart;
+            return cart.getProducts({ where: { id: prodId } });
+        })
+        .then(products => {
 
-    })
-    .catch(err =>console.log(err));
+            let product;
+
+            if (products.length > 0) {
+                product = products[0];
+            }
+
+
+            if (product) {
+                let oldQuantity = product.cartItem.quantity;
+                newQuantity = oldQuantity + 1;
+
+                return product;
+            }
+
+            return Product.findByPk(prodId);
+
+
+        })
+        .then(prod => {
+            fetchedCart.addProduct(prod, { through: { quantity: newQuantity } });
+        })
+        .then(() => {
+            res.redirect('/cart');
+        })
+        .catch(err => console.log(err));
 
     //res.redirect('/cart');
 };
 
 exports.deleteCartProduct = (req, res, next) => {
-    const productId = req.body.productId;
+    const prodId = req.body.productId;
 
-    Product.findById(productId, product => {
-        Cart.deleteProduct(productId, product.price);
-        res.redirect('/cart');
-    });
+    req.user.getCart()
+        .then(cart => {
+            return cart.getProducts({ where: { id: prodId } });
+        })
+        .then(products =>{
+            const product = products[0];
+            return product.cartItem.destroy();
+        })
+        .then(result => {
+            res.redirect('/cart');
+        })
+        .catch(err => console.log(err));
 };
 
 
