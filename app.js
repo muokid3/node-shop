@@ -3,8 +3,8 @@ const bodyParser = require('body-parser');
 const path = require('path');
 
 const adminRoutes = require('./routes/admin');
-// const shopRouter = require('./routes/shop');
-const mongoConnect = require('./utils/database');
+const shopRouter = require('./routes/shop');
+const mongoConnect = require('./utils/database').mongoConnect;
 
 const errorsController = require('./controllers/errors');
 
@@ -27,12 +27,13 @@ app.use((req, res, next) => {
     //         next();
     //     })
     //     .catch(err => console.log(err));
-})
+    next();
+});
 
 
 
 app.use('/admin', adminRoutes);
-// app.use(shopRouter);
+app.use(shopRouter);
 
 app.use(errorsController.error404);
 
